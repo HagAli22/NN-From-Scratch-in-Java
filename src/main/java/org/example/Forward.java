@@ -8,5 +8,11 @@ public class Forward {
     public double[][] net2, out2;  
     public double[][] net3, out3;
     
+    public void forward(double[][] X_batch, 
+                       double[][] W1, double[][] b1,
+                       double[][] W2, double[][] b2, 
+                       double[][] W3, double[][] b3) {
+        
 
+    }
 }
