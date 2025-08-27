@@ -13,6 +13,9 @@ public class Forward {
                        double[][] W2, double[][] b2, 
                        double[][] W3, double[][] b3) {
         
+        Matrix_Operations matOps = new Matrix_Operations();
+        Activation_Function activation = new Activation_Function();
+
 
     }
 }
