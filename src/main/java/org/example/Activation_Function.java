@@ -1,7 +1,6 @@
 package org.example;
 
 public class Activation_Function {
-
     // ---------------- ReLU ---------------- //
     public static double[][] relu(double[][] input) {
         int rows = input.length, cols = input[0].length;
@@ -13,7 +12,4 @@ public class Activation_Function {
 
         return result;
     }
-
-
-
 }
