@@ -14,37 +14,17 @@ public class Forward {
                        double[][] W3, double[][] b3) {
         
 
-        
-        Activation_Function activation = new Activation_Function();
-
         // Layer 1: Input -> Hidden1
-
-        Matrix_Operations matOps = new Matrix_Operations();
-        Activation_Function activation = new Activation_Function();
-        // Layer 1: Input -> Hidden1
-
-        net1 = matOps.add(matOps.multiply(X_batch, W1), b1);
-        out1 = activation.relu(net1);
-        
-        // Layer 2: Hidden1 -> Hidden2
-        net2 = matOps.add(matOps.multiply(out1, W2), b2);
-        out2 = activation.relu(net2);
-        
-        // Layer 3: Hidden2 -> Output
-        net3 = matOps.add(matOps.multiply(out2, W3), b3);
-        out3 = activation.softmax(net3);
-
-
         net1 = Matrix_Operations.add(Matrix_Operations.multiply(X_batch, W1), b1);
-        //out1 = activation.relu(net1);
+        out1 = Activation_Function.relu(net1);
         
         // Layer 2: Hidden1 -> Hidden2
         net2 = Matrix_Operations.add(Matrix_Operations.multiply(out1, W2), b2);
-        //out2 = activation.relu(net2);
+        out2 = Activation_Function.relu(net2);
         
         // Layer 3: Hidden2 -> Output
         net3 = Matrix_Operations.add(Matrix_Operations.multiply(out2, W3), b3);
-        //out3 = activation.softmax(net3);
+        out3 = Activation_Function.softmax(net3);
 
     }
 }
