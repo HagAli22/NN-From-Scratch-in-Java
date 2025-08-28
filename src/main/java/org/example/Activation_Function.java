@@ -12,4 +12,42 @@ public class Activation_Function {
 
         return result;
     }
+    // ---------------- Batch Normalization After Relu ---------------- //
+    public static double[][] batchNormAfterRelu(double[][] input, double epsilon) {
+        // Step 1: Apply ReLU first
+        double[][] reluOutput = relu(input);
+
+        int rows = reluOutput.length, cols = reluOutput[0].length;
+        double[][] result = new double[rows][cols];
+
+        // Step 2: Apply Batch Normalization
+        for (int j = 0; j < cols; j++) {
+            // Extract column
+            double[] column = new double[rows];
+            for (int i = 0; i < rows; i++) {
+                column[i] = reluOutput[i][j];
+            }
+
+            // Compute mean
+            double mean = 0;
+            for (double v : column) mean += v;
+            mean /= rows;
+
+            // Compute variance
+            double variance = 0;
+            for (double v : column) variance += Math.pow(v - mean, 2);
+            variance /= rows;
+
+            double stdDev = Math.sqrt(variance + epsilon);
+
+            // Normalize
+            for (int i = 0; i < rows; i++) {
+                result[i][j] = (reluOutput[i][j] - mean) / stdDev;
+            }
+        }
+
+        return result;
+    }
+
+
 }
