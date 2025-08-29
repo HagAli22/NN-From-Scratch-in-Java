@@ -37,7 +37,7 @@ public class Load_dataset {
         int[][] images = new int[numImage][numRows*numCols];
 
         for (int i=0 ; i<numImage; i++){
-            for (int j=0; j<numRows; j++){
+            for (int j=0; j<numRows*numCols; j++){
                 images[i][j] = dis.readUnsignedByte();
             }
         }
