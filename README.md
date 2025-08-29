@@ -138,11 +138,6 @@ This project is released under the MIT License — free to use, modify, and shar
 💡 **Note**: The main purpose of this project is **learning and understanding the fundamentals**, not achieving state-of-the-art accuracy.
 
 
-# Mostafa
-# Mostafa2
-
-
-
 ---
 
 ## 🎯 Goal
@@ -276,15 +271,4 @@ This project is released under the MIT License — free to use, modify, and shar
 ---
 
 💡 **Note**: The main purpose of this project is **learning and understanding the fundamentals**, not achieving state-of-the-art accuracy.
-
-# Mostafa
-# Mostafa2
-
-
-
-# MAHMOUD
-
-
-
-# MAHMOUD
 
