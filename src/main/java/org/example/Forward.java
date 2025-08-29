@@ -22,23 +22,26 @@ public class Forward {
         // Layer 1: Input -> Hidden1
         net1 = Matrix_Operations.add(Matrix_Operations.multiply(X_batch, W1), b1);
         out1 = Activation_Function.relu(net1);
+        out1 = Techniques.dropout(out1, 0.3, true);
+
+
+        // Layer 2: Hidden1 -> Hidden2
+        net2 = Matrix_Operations.add(Matrix_Operations.multiply(out1, W2), b2);
+        out2 = Activation_Function.relu(net2);
+
 
         // Initialize gamma/beta if using batch norm for first time
         if (gamma1 == null) {
             gamma1 = Techniques.initializeGamma(out1[0].length);
             beta1 = Techniques.initializeBeta(out1[0].length);
         }
-        out1 = Techniques.batchNormalization(out1, gamma1, beta1);
+        out2 = Techniques.batchNormalization(out2, gamma1, beta1);
 
-        // Layer 2: Hidden1 -> Hidden2
-        net2 = Matrix_Operations.add(Matrix_Operations.multiply(out1, W2), b2);
-        out2 = Activation_Function.relu(net2);
-        out2 = Techniques.dropout(out2, 0.3, true);
 
         // Layer 3: Hidden2 -> Output
         net3 = Matrix_Operations.add(Matrix_Operations.multiply(out2, W3), b3);
         out3 = Activation_Function.softmax(net3);
-        out3 = Techniques.dropout(out3, 0.2, true);
+
 
         return out3;
     }
