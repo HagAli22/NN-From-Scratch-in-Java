@@ -4,8 +4,10 @@ public class Forward {
     // input -> X_batch, W1, b1, W2, b2, W3, b3
     // output -> net1, out1, net2, out2, net3, out3
 
-    private double[][] net1, out1;
-    private double[][] net2, out2;
+    double[][] net1;
+    double[][] out1;
+    double[][] net2;
+    double[][] out2;
     private double[][] net3, out3;
 
     public double[][] forward(double[][] X_batch,
