@@ -160,6 +160,23 @@ public class Matrix_Operations {
         }
         return adj;
     }
+    // Helper: Find max value in a row
+    private static double findMax(double[] row) {
+        double max = Double.NEGATIVE_INFINITY;
+        for (double v : row) {
+            if (v > max) max = v;
+        }
+        return max;
+}
+    // Helper: Compute exp(x - max) for each element and return their sum
+    private static double sumExp(double[] row, double max, double[] expRow) {
+        double sum = 0;
+        for (int j = 0; j < row.length; j++) {
+            expRow[j] = Math.exp(row[j] - max);
+            sum += expRow[j];
+        }
+        return sum;
+}
 
     // Flatten
     public static double[] flatten(double[][] a) {

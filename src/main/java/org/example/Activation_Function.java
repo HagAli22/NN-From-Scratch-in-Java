@@ -56,10 +56,10 @@ public class Activation_Function {
 
         for (int i = 0; i < rows; i++) {
             // 1. Find max for numerical stability
-            double maxLogit = findMax(input[i]);
+            double maxLogit = Matrix_Operations.findMax(input[i]);
 
             // 2. Compute exp(x - max) and sum
-            double expSum = sumExp(input[i], maxLogit, result[i]);
+            double expSum = Matrix_Operations.sumExp(input[i], maxLogit, result[i]);
 
             // 3. Normalize
             for (int j = 0; j < cols; j++) {
@@ -70,22 +70,8 @@ public class Activation_Function {
         return result;
     }
 
-    // Helper: Find max value in a row
-    private static double findMax(double[] row) {
-        double max = Double.NEGATIVE_INFINITY;
-        for (double v : row) {
-            if (v > max) max = v;
-        }
-        return max;
-    }
 
-    // Helper: Compute exp(x - max) for each element and return their sum
-    private static double sumExp(double[] row, double max, double[] expRow) {
-        double sum = 0;
-        for (int j = 0; j < row.length; j++) {
-            expRow[j] = Math.exp(row[j] - max);
-            sum += expRow[j];
-        }
-        return sum;
-    }
+
+
+
 }
