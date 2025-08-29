@@ -91,4 +91,108 @@ public class Techniques {
 
 
 
+    // ======================= REGULARIZATION =======================
+
+
+    public static double l2Regularization(double[][] weights, double lambda) {
+        double sum = 0.0;
+
+        for (int i = 0; i < weights.length; i++) {
+            for (int j = 0; j < weights[0].length; j++) {
+                sum += weights[i][j] * weights[i][j];
+            }
+        }
+
+        return lambda * sum * 0.5; // 0.5 factor is standard in L2 reg
+    }
+
+    /**
+     * Calculate L1 regularization loss
+     * @param weights Weight matrix
+     * @param lambda Regularization strength
+     * @return L1 penalty value
+     */
+    public static double l1Regularization(double[][] weights, double lambda) {
+        double sum = 0.0;
+
+        for (int i = 0; i < weights.length; i++) {
+            for (int j = 0; j < weights[0].length; j++) {
+                sum += Math.abs(weights[i][j]);
+            }
+        }
+
+        return lambda * sum;
+    }
+
+    /**
+     * Calculate total regularization loss for multiple weight matrices
+     * @param weights Array of weight matrices
+     * @param lambda Regularization strength
+     * @param useL1 True for L1, false for L2
+     * @return Total regularization penalty
+     */
+    public static double totalRegularization(double[][][] weights, double lambda, boolean useL1) {
+        double totalLoss = 0.0;
+
+        for (double[][] weightMatrix : weights) {
+            if (useL1) {
+                totalLoss += l1Regularization(weightMatrix, lambda);
+            } else {
+                totalLoss += l2Regularization(weightMatrix, lambda);
+            }
+        }
+
+        return totalLoss;
+    }
+
+    /**
+     * Apply weight decay (L2 regularization gradient)
+     * @param weights Weight matrix to apply decay to
+     * @param lambda Regularization strength
+     * @return Gradient matrix for weight decay
+     */
+    public static double[][] weightDecayGradient(double[][] weights, double lambda) {
+        int rows = weights.length;
+        int cols = weights[0].length;
+        double[][] gradient = new double[rows][cols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                gradient[i][j] = lambda * weights[i][j];
+            }
+        }
+
+        return gradient;
+    }
+
+    // ======================= UTILITY METHODS =======================
+
+    /**
+     * Set random seed for reproducible dropout
+     */
+    public static void setRandomSeed(long seed) {
+        random = new Random(seed);
+    }
+
+    /**
+     * Initialize gamma parameters for batch normalization (usually to 1.0)
+     */
+    public static double[][] initializeGamma(int features) {
+        double[][] gamma = new double[1][features];
+        for (int i = 0; i < features; i++) {
+            gamma[0][i] = 1.0;
+        }
+        return gamma;
+    }
+
+    /**
+     * Initialize beta parameters for batch normalization (usually to 0.0)
+     */
+    public static double[][] initializeBeta(int features) {
+        double[][] beta = new double[1][features];
+        for (int i = 0; i < features; i++) {
+            beta[0][i] = 0.0;
+        }
+        return beta;
+    }
 }
