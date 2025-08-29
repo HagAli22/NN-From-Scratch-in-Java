@@ -12,6 +12,21 @@ public class Activation_Function {
 
         return result;
     }
+    // ---------------- Derivitive After Relu---------------- //
+    public static double[][] reluDerivativeFromOutput(double[][] reluOutput) {
+        int rows = reluOutput.length, cols = reluOutput[0].length;
+        double[][] derivative = new double[rows][cols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                // If ReLU output > 0 → derivative = 1, otherwise = 0
+                derivative[i][j] = reluOutput[i][j] > 0 ? 1.0 : 0.0;
+            }
+        }
+
+        return derivative;
+    }
+
     // ---------------- Batch Normalization After Relu ---------------- //
     public static double[][] batchNormAfterRelu(double[][] input, double epsilon) {
         // Step 1: Apply ReLU first
