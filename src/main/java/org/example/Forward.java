@@ -19,27 +19,30 @@ public class Forward {
                               double[][] W2, double[][] b2,
                               double[][] W3, double[][] b3) {
 
+        int batchSize = X_batch.length;
+
         // Layer 1: Input -> Hidden1
-        net1 = Matrix_Operations.add(Matrix_Operations.multiply(X_batch, W1), b1);
+        net1 = Matrix_Operations.add(Matrix_Operations.multiply(X_batch, W1),
+                Matrix_Operations.broadcastBias(b1, batchSize));
         out1 = Activation_Function.relu(net1);
         out1 = Techniques.dropout(out1, 0.3, true);
 
 
         // Layer 2: Hidden1 -> Hidden2
-        net2 = Matrix_Operations.add(Matrix_Operations.multiply(out1, W2), b2);
+        net2 = Matrix_Operations.add(Matrix_Operations.multiply(out1, W2),
+                Matrix_Operations.broadcastBias(b2, batchSize));
         out2 = Activation_Function.relu(net2);
-
-
         // Initialize gamma/beta if using batch norm for first time
         if (gamma1 == null) {
-            gamma1 = Techniques.initializeGamma(out1[0].length);
-            beta1 = Techniques.initializeBeta(out1[0].length);
+            gamma1 = Techniques.initializeGamma(out2[0].length);
+            beta1 = Techniques.initializeBeta(out2[0].length);
         }
         out2 = Techniques.batchNormalization(out2, gamma1, beta1);
 
 
         // Layer 3: Hidden2 -> Output
-        net3 = Matrix_Operations.add(Matrix_Operations.multiply(out2, W3), b3);
+        net3 = Matrix_Operations.add(Matrix_Operations.multiply(out2, W3),
+                Matrix_Operations.broadcastBias(b3, batchSize));
         out3 = Activation_Function.softmax(net3);
 
 

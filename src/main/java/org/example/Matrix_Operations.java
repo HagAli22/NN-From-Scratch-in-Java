@@ -4,16 +4,37 @@ public class Matrix_Operations {
 
     // ---------------- Matrix Operations ---------------- //
 
-    // Addition with support for broadcasting (row or column vector)
+    // Addition
     public static double[][] add(double[][] a, double[][] b) {
-        if (isSameDimension(a, b)) {
-            return addSameDimension(a, b);
-        } else if (isRowVector(b)) {
-            return addRowBroadcast(a, b);
-        } else if (isColumnVector(b)) {
-            return addColumnBroadcast(a, b);
+        validateSameDimension(a, b);
+        int rows = a.length, cols = a[0].length;
+        double[][] result = new double[rows][cols];
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                result[i][j] = a[i][j] + b[i][j];
+
+        return result;
+    }
+
+
+    /**
+     * Broadcast bias vector to match batch size
+     * @param bias Bias matrix [1 x features]
+     * @param batchSize Number of samples in batch
+     * @return Broadcasted bias [batchSize x features]
+     */
+    public static double[][] broadcastBias(double[][] bias, int batchSize) {
+        int features = bias[0].length;
+        double[][] broadcasted = new double[batchSize][features];
+
+        for (int i = 0; i < batchSize; i++) {
+            for (int j = 0; j < features; j++) {
+                broadcasted[i][j] = bias[0][j];
+            }
         }
-        throw new IllegalArgumentException("Incompatible matrix shapes for addition.");
+
+        return broadcasted;
     }
 
     // Subtraction
@@ -210,58 +231,6 @@ public class Matrix_Operations {
     private static void validateSameDimension(double[][] a, double[][] b) {
         if (a.length != b.length || a[0].length != b[0].length)
             throw new IllegalArgumentException("Matrices must have the same dimensions.");
-    }
-
-    private static double[][] addSameDimension(double[][] a, double[][] b) {
-        int numRows = a.length;
-        int numCols = a[0].length;
-        double[][] result = new double[numRows][numCols];
-
-        for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < numCols; j++) {
-                result[i][j] = a[i][j] + b[i][j];
-            }
-        }
-        return result;
-    }
-
-    private static double[][] addRowBroadcast(double[][] a, double[][] rowVec) {
-        int numRows = a.length;
-        int numCols = a[0].length;
-        double[][] result = new double[numRows][numCols];
-
-        for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < numCols; j++) {
-                result[i][j] = a[i][j] + rowVec[0][j];
-            }
-        }
-        return result;
-    }
-
-    private static double[][] addColumnBroadcast(double[][] a, double[][] colVec) {
-        int numRows = a.length;
-        int numCols = a[0].length;
-        double[][] result = new double[numRows][numCols];
-
-        for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < numCols; j++) {
-                result[i][j] = a[i][j] + colVec[i][0];
-            }
-        }
-        return result;
-    }
-
-    // ---- Helpers ---- //
-    private static boolean isSameDimension(double[][] a, double[][] b) {
-        return a.length == b.length && a[0].length == b[0].length;
-    }
-
-    private static boolean isRowVector(double[][] m) {
-        return m.length == 1;
-    }
-
-    private static boolean isColumnVector(double[][] m) {
-        return m[0].length == 1;
     }
 }
 
