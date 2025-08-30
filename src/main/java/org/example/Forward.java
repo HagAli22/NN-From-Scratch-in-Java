@@ -12,7 +12,7 @@ public class Forward {
 
     // Batch normalization parameters
     private double[][] gamma1, beta1; // For layer 1
-    private double[][] gamma2, beta2; // For layer 2
+
 
     public double[][] forward(double[][] X_batch,
                               double[][] W1, double[][] b1,
@@ -57,6 +57,5 @@ public class Forward {
     // Getters for batch norm parameters
     public double[][] getGamma1() { return gamma1; }
     public double[][] getBeta1() { return beta1; }
-    public double[][] getGamma2() { return gamma2; }
-    public double[][] getBeta2() { return beta2; }
+
 }
