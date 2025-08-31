@@ -12,19 +12,18 @@ public class Main {
     private static final int OUTPUT_SIZE = 10;  // 10 digits (0-9)
 
     // Training parameters
-    private static final int EPOCHS = 50;
+    private static final int EPOCHS = 10;
     private static final int BATCH_SIZE = 32;
     private static final double LEARNING_RATE = 0.001;
-    private static final double L2_LAMBDA = 0.001;
 
     // File paths for MNIST dataset
-    private static final String TRAIN_IMAGES_PATH = "D:\\NN-From-Scratch-in-Java\\data\\train-images.idx3-ubyte";
-    private static final String TRAIN_LABELS_PATH = "D:\\NN-From-Scratch-in-Java\\data\\train-labels.idx1-ubyte";
-    private static final String TEST_IMAGES_PATH = "D:\\NN-From-Scratch-in-Java\\data\\t10k-images.idx3-ubyte";
-    private static final String TEST_LABELS_PATH = "D:\\NN-From-Scratch-in-Java\\data\\t10k-labels.idx1-ubyte";
+    private static final String TRAIN_IMAGES_PATH = "data/train-images.idx3-ubyte";
+    private static final String TRAIN_LABELS_PATH = "data/train-labels.idx1-ubyte";
+    private static final String TEST_IMAGES_PATH = "data/t10k-images.idx3-ubyte";
+    private static final String TEST_LABELS_PATH = "data/t10k-labels.idx1-ubyte";
 
     public static void main(String[] args) {
-        System.out.println("🚀 Starting Neural Network Training...");
+        System.out.println("Starting Neural Network Training...");
         System.out.println("=" .repeat(60));
 
         try {
@@ -38,15 +37,15 @@ public class Main {
             backward.setForwardAndLoss(forward, lossFunction);
 
             // Load datasets
-            System.out.println("📂 Loading MNIST dataset...");
+            System.out.println("Loading MNIST dataset...");
             DataSet trainSet = dataLoader.loadData(TRAIN_IMAGES_PATH, TRAIN_LABELS_PATH);
             DataSet testSet = dataLoader.loadData(TEST_IMAGES_PATH, TEST_LABELS_PATH);
 
-            System.out.printf("✅ Training set: %d samples\n", trainSet.getSize());
-            System.out.printf("✅ Test set: %d samples\n", testSet.getSize());
+            System.out.printf("Training set: %d samples\n", trainSet.getSize());
+            System.out.printf("Test set: %d samples\n", testSet.getSize());
 
             // Initialize network weights and biases
-            System.out.println("\n🔧 Initializing network parameters...");
+            System.out.println("\n Initializing network parameters...");
             double[][] W1 = initializeWeights(INPUT_SIZE, HIDDEN1_SIZE);
             double[][] W2 = initializeWeights(HIDDEN1_SIZE, HIDDEN2_SIZE);
             double[][] W3 = initializeWeights(HIDDEN2_SIZE, OUTPUT_SIZE);
@@ -55,19 +54,20 @@ public class Main {
             double[][] b2 = initializeBiases(1, HIDDEN2_SIZE);
             double[][] b3 = initializeBiases(1, OUTPUT_SIZE);
 
-            // Convert training data
+            // Convert training data 0,1,2,3,4,5,6,7,8,9
             double[][] X_train = normalizeData(convertToDouble(trainSet.getImages()));
             double[][] Y_train = oneHotEncode(trainSet.getLabels(), OUTPUT_SIZE);
 
             double[][] X_test = normalizeData(convertToDouble(testSet.getImages()));
             double[][] Y_test = oneHotEncode(testSet.getLabels(), OUTPUT_SIZE);
 
-            System.out.printf("🎯 Network Architecture: %d → %d → %d → %d\n",
+            System.out.printf("Network Architecture: %d → %d → %d → %d\n",
                     INPUT_SIZE, HIDDEN1_SIZE, HIDDEN2_SIZE, OUTPUT_SIZE);
-            System.out.println("\n🏋️ Starting training...");
+            System.out.println("\n Starting training...");
             System.out.println("=" .repeat(60));
 
             // Training loop
+            int d=0;
             for (int epoch = 0; epoch < EPOCHS; epoch++) {
                 double epochLoss = 0.0;
                 int correct = 0;
@@ -77,8 +77,6 @@ public class Main {
                 shuffleData(X_train, Y_train);
 
                 for (int batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
-                    // Clear cache before each batch
-                    Techniques.clearCache();
 
                     // Create batch
                     int startIdx = batchIdx * BATCH_SIZE;
@@ -99,12 +97,6 @@ public class Main {
                     // Calculate batch loss
                     double batchLoss = calculateBatchLoss(predictions, Y_batch, lossFunction);
 
-                    // Add regularization
-                    double regLoss = Techniques.l2Regularization(W1, L2_LAMBDA) +
-                            Techniques.l2Regularization(W2, L2_LAMBDA) +
-                            Techniques.l2Regularization(W3, L2_LAMBDA);
-                    batchLoss += regLoss;
-
                     epochLoss += batchLoss;
 
                     // Calculate accuracy
@@ -113,8 +105,6 @@ public class Main {
                     // Backward pass
                     backward.computeGradients(X_batch, Y_batch, W1, W2, W3, b1, b2, b3);
 
-                    // Add regularization to gradients
-                    addRegularizationGradients(backward, W1, W2, W3, L2_LAMBDA);
 
                     // Update weights
                     backward.updateWeights(W1, W2, W3, b1, b2, b3, LEARNING_RATE);
@@ -141,28 +131,65 @@ public class Main {
             }
 
             System.out.println("=" .repeat(60));
-            System.out.println("🎉 Training completed successfully!");
+            System.out.println("Training completed successfully!");
 
             // Final evaluation
-            System.out.println("\n📊 Final Model Evaluation:");
+            System.out.println("\n Final Model Evaluation:");
             double finalTestAccuracy = evaluateModel(forward, X_test, Y_test, W1, b1, W2, b2, W3, b3);
-            System.out.printf("🎯 Final Test Accuracy: %.2f%%\n", finalTestAccuracy);
+            System.out.printf("Final Test Accuracy: %.2f%%\n", finalTestAccuracy);
 
             // Test on a few samples
-            System.out.println("\n🔍 Sample Predictions:");
+            System.out.println("\n Sample Predictions:");
             testSamplePredictions(forward, X_test, testSet.getLabels(), W1, b1, W2, b2, W3, b3);
 
         } catch (IOException e) {
-            System.err.println("❌ Error loading dataset: " + e.getMessage());
-            System.err.println("💡 Make sure MNIST dataset files are in the project directory:");
+            System.err.println("Error loading dataset: " + e.getMessage());
+            System.err.println("Make sure MNIST dataset files are in the project directory:");
             System.err.println("   - " + TRAIN_IMAGES_PATH);
             System.err.println("   - " + TRAIN_LABELS_PATH);
             System.err.println("   - " + TEST_IMAGES_PATH);
             System.err.println("   - " + TEST_LABELS_PATH);
         } catch (Exception e) {
-            System.err.println("❌ Unexpected error: " + e.getMessage());
+            System.err.println("Unexpected error: " + e.getMessage());
             e.printStackTrace();
         }
+        /*
+        * Starting Neural Network Training...
+        ============================================================
+        Loading MNIST dataset...
+        Training set: 60000 samples
+        Test set: 10000 samples
+
+         Initializing network parameters...
+        Network Architecture: 784 → 128 → 64 → 10
+
+         Starting training...
+        ============================================================
+        Epoch   1/10 | Loss: 3.6369 | Train Acc:  89.47%
+        Epoch   2/10 | Loss: 1.8012 | Train Acc:  94.79%
+        Epoch   3/10 | Loss: 1.3378 | Train Acc:  96.13%
+        Epoch   4/10 | Loss: 1.0799 | Train Acc:  96.87%
+        Epoch   5/10 | Loss: 0.8876 | Train Acc:  97.43% | Test Acc:  97.15%
+        Epoch   6/10 | Loss: 0.7489 | Train Acc:  97.83%
+        Epoch   7/10 | Loss: 0.6631 | Train Acc:  98.08%
+        Epoch   8/10 | Loss: 0.5613 | Train Acc:  98.38%
+        Epoch   9/10 | Loss: 0.4841 | Train Acc:  98.60%
+        Epoch  10/10 | Loss: 0.4260 | Train Acc:  98.77% | Test Acc:  97.80%
+        ============================================================
+        Training completed successfully!
+
+         Final Model Evaluation:
+        Final Test Accuracy: 97.80%
+
+         Sample Predictions:
+        Ok Sample 1: Predicted = 1, Actual = 1, Confidence = 100.0%
+        Ok Sample 2: Predicted = 2, Actual = 2, Confidence = 100.0%
+        Ok Sample 3: Predicted = 4, Actual = 4, Confidence = 98.4%
+        Ok Sample 4: Predicted = 4, Actual = 4, Confidence = 100.0%
+        Ok Sample 5: Predicted = 2, Actual = 2, Confidence = 100.0%
+
+        Process finished with exit code 0
+        * */
     }
 
     // Helper methods
@@ -184,10 +211,6 @@ public class Main {
         return new double[rows][cols]; // Initialize to zeros
     }
 
-    // Alternative: Create bias with batch size
-    private static double[][] initializeBiasesForBatch(int batchSize, int cols) {
-        return new double[batchSize][cols]; // Initialize to zeros
-    }
 
     private static double[][] convertToDouble(int[][] intArray) {
         double[][] doubleArray = new double[intArray.length][intArray[0].length];
@@ -234,10 +257,47 @@ public class Main {
         }
     }
 
+    public static double[][] toOneHotBatch(double[][] predictions) {
+        if (predictions == null || predictions.length == 0) {
+            throw new IllegalArgumentException("Predictions array is null or empty");
+        }
+
+        double[][] oneHotBatch = new double[predictions.length][];
+
+        for (int i = 0; i < predictions.length; i++) {
+            double[] row = predictions[i];
+            if (row == null || row.length == 0) {
+                throw new IllegalArgumentException("Row " + i + " is null or empty");
+            }
+
+
+            int maxIndex = 0;
+            double maxValue = row[0];
+            for (int j = 1; j < row.length; j++) {
+                if (row[j] > maxValue) {
+                    maxValue = row[j];
+                    maxIndex = j;
+                }
+            }
+
+            double[] oneHot = new double[row.length];
+            for (int j = 0; j < row.length; j++) {
+                oneHot[j] = (j == maxIndex) ? 1.0 : 0.0;
+            }
+
+            oneHotBatch[i] = oneHot;
+        }
+
+        return oneHotBatch;
+    }
+
+
     private static double calculateBatchLoss(double[][] predictions, double[][] labels, Loss lossFunction) {
         double totalLoss = 0.0;
+        double[][] oneHotBatch = toOneHotBatch(predictions);
         for (int i = 0; i < predictions.length; i++) {
-            totalLoss += lossFunction.calculate_loss(labels[i], predictions[i]);
+
+            totalLoss += lossFunction.calculate_loss(labels[i], oneHotBatch[i]);
         }
         return totalLoss / predictions.length;
     }
@@ -266,22 +326,10 @@ public class Main {
         return maxIndex;
     }
 
-    private static void addRegularizationGradients(Backward backward, double[][] W1, double[][] W2, double[][] W3, double lambda) {
-        // Add L2 regularization gradients
-        double[][] regGrad1 = Techniques.weightDecayGradient(W1, lambda);
-        double[][] regGrad2 = Techniques.weightDecayGradient(W2, lambda);
-        double[][] regGrad3 = Techniques.weightDecayGradient(W3, lambda);
-
-        // Add to existing gradients
-        backward.dW1 = Matrix_Operations.add(backward.dW1, regGrad1);
-        backward.dW2 = Matrix_Operations.add(backward.dW2, regGrad2);
-        backward.dW3 = Matrix_Operations.add(backward.dW3, regGrad3);
-    }
 
     private static double evaluateModel(Forward forward, double[][] X_test, double[][] Y_test,
                                         double[][] W1, double[][] b1, double[][] W2, double[][] b2,
                                         double[][] W3, double[][] b3) {
-        Techniques.clearCache();
         double[][] predictions = forward.forward(X_test, W1, b1, W2, b2, W3, b3);
         int correct = calculateCorrectPredictions(predictions, Y_test);
         return (double) correct / X_test.length * 100;
@@ -296,14 +344,13 @@ public class Main {
             int sampleIdx = random.nextInt(X_test.length);
             double[][] sampleInput = {X_test[sampleIdx]};
 
-            Techniques.clearCache();
             double[][] prediction = forward.forward(sampleInput, W1, b1, W2, b2, W3, b3);
 
             int predictedClass = argmax(prediction[0]);
             int actualClass = actualLabels[sampleIdx];
             double confidence = prediction[0][predictedClass] * 100;
 
-            String status = (predictedClass == actualClass) ? "✅" : "❌";
+            String status = (predictedClass == actualClass) ? "Ok" : "No";
             System.out.printf("%s Sample %d: Predicted = %d, Actual = %d, Confidence = %.1f%%\n",
                     status, i + 1, predictedClass, actualClass, confidence);
         }

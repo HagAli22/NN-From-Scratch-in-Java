@@ -8,8 +8,6 @@ public class Backward {
     public double[][] dW1, dW2, dW3;
     public double[][] db1, db2, db3;
 
-    // Gradients for batch normalization
-    public double[][] dGamma1, dBeta1;
 
     public void setForwardAndLoss(Forward forward, Loss loss) {
         this.forward = forward;
@@ -17,7 +15,7 @@ public class Backward {
     }
 
     /**
-     * Compute gradients for a 3-layer neural network with dropout and batch norm
+     * Compute gradients for a 3-layer neural network
      */
     public void computeGradients(double[][] X_batch, double[][] Y_batch,
                                  double[][] W1, double[][] W2, double[][] W3,
@@ -49,19 +47,11 @@ public class Backward {
         // ================= Hidden Layer 2 (with Batch Norm) =================
         double[][] dA2 = Matrix_Operations.multiply(dZ3, Matrix_Operations.transpose(W3));
 
-        // Backprop through batch normalization
-        double[][] dA2_bn = Techniques.batchNormBackward(dA2, out2,
-                forward.getGamma1(), forward.getBeta1());
-
-        // Store batch norm gradients
-        dGamma1 = Techniques.computeGammaGradient(dA2, out2);
-        dBeta1 = Techniques.computeBetaGradient(dA2);
-
-        double[][] dZ2 = new double[dA2_bn.length][dA2_bn[0].length];
+        double[][] dZ2 = new double[dA2.length][dA2[0].length];
         double[][] reluDer2 = Activation_Function.reluDerivativeFromNet(net2);
-        for (int i = 0; i < dA2_bn.length; i++)
-            for (int j = 0; j < dA2_bn[0].length; j++)
-                dZ2[i][j] = dA2_bn[i][j] * reluDer2[i][j];
+        for (int i = 0; i < dA2.length; i++)
+            for (int j = 0; j < dA2[0].length; j++)
+                dZ2[i][j] = dA2[i][j] * reluDer2[i][j];
 
         dW2 = Matrix_Operations.multiply(Matrix_Operations.transpose(out1), dZ2);
         db2 = new double[1][dZ2[0].length];
@@ -74,8 +64,6 @@ public class Backward {
         // ================= Hidden Layer 1 (with Dropout) =================
         double[][] dA1 = Matrix_Operations.multiply(dZ2, Matrix_Operations.transpose(W2));
 
-        // Backprop through dropout (assuming dropout mask is saved in Techniques)
-        dA1 = Techniques.dropoutBackward(dA1, 0.3);
 
         double[][] dZ1 = new double[dA1.length][dA1[0].length];
         double[][] reluDer1 = Activation_Function.reluDerivativeFromNet(net1);
@@ -108,11 +96,7 @@ public class Backward {
         updateMatrixInPlace(b2, db2, learningRate);
         updateMatrixInPlace(b3, db3, learningRate);
 
-        // Update batch normalization parameters
-        if (dGamma1 != null && dBeta1 != null) {
-            updateMatrixInPlace(forward.getGamma1(), dGamma1, learningRate);
-            updateMatrixInPlace(forward.getBeta1(), dBeta1, learningRate);
-        }
+
     }
 
     /**
