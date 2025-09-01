@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.HashMap;
+
 public class Backward {
     private Forward forward;
     private Loss loss;
@@ -80,32 +82,55 @@ public class Backward {
         }
     }
 
-    /**
-     * Apply gradient descent update - Fixed version
-     */
-    public void updateWeights(double[][] W1, double[][] W2, double[][] W3,
-                              double[][] b1, double[][] b2, double[][] b3,
-                              double learningRate) {
 
-        // Update weights in-place
-        updateMatrixInPlace(W1, dW1, learningRate);
-        updateMatrixInPlace(W2, dW2, learningRate);
-        updateMatrixInPlace(W3, dW3, learningRate);
+    public void updateVelocity(double[][] velocityW1, double[][] velocityW2, double[][] velocityW3,
+                              double[][] velocityB1, double[][] velocityB2, double[][] velocityB3,
+                              double Beta) {
 
-        updateMatrixInPlace(b1, db1, learningRate);
-        updateMatrixInPlace(b2, db2, learningRate);
-        updateMatrixInPlace(b3, db3, learningRate);
+        // Update velocity in-place
+        updateVelocityInPlace(velocityW1, dW1, Beta);
+        updateVelocityInPlace(velocityW2, dW2, Beta);
+        updateVelocityInPlace(velocityW3, dW3, Beta);
+
+        updateVelocityInPlace(velocityB1, db1, Beta);
+        updateVelocityInPlace(velocityB2, db2, Beta);
+        updateVelocityInPlace(velocityB3, db3, Beta);
 
 
     }
 
-    /**
-     * Helper method to update matrix in-place
-     */
-    private void updateMatrixInPlace(double[][] matrix, double[][] gradient, double learningRate) {
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[0].length; j++) {
-                matrix[i][j] -= learningRate * gradient[i][j];
+
+    private void updateVelocityInPlace(double[][] matrixVelocity, double[][] gradient, double Beta) {
+        for (int i = 0; i < matrixVelocity.length; i++) {
+            for (int j = 0; j < matrixVelocity[0].length; j++) {
+                matrixVelocity[i][j] = Beta * matrixVelocity[i][j] + gradient[i][j];
+            }
+        }
+    }
+
+
+    public void updateWeights(double[][] W1, double[][] W2, double[][] W3,
+                              double[][] b1, double[][] b2, double[][] b3,
+                              double[][] velocityW1, double[][] velocityW2, double[][] velocityW3,
+                              double[][] velocityB1, double[][] velocityB2, double[][] velocityB3,
+                              double learningRate) {
+
+        // Update weights in-place
+        updateWeightsInPlace(W1, velocityW1, learningRate);
+        updateWeightsInPlace(W2, velocityW2, learningRate);
+        updateWeightsInPlace(W3, velocityW3, learningRate);
+
+        updateWeightsInPlace(b1, velocityB1, learningRate);
+        updateWeightsInPlace(b2, velocityB2, learningRate);
+        updateWeightsInPlace(b3, velocityB3, learningRate);
+
+
+    }
+
+    private void updateWeightsInPlace(double[][] matrixWeights, double[][] matrixVelocity, double learningRate) {
+        for (int i = 0; i < matrixWeights.length; i++) {
+            for (int j = 0; j < matrixWeights[0].length; j++) {
+                matrixWeights[i][j] -= learningRate * matrixVelocity[i][j];
             }
         }
     }

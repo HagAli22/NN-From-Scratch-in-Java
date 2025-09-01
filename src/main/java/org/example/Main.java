@@ -1,6 +1,7 @@
 package org.example;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 
 public class Main {
@@ -15,6 +16,7 @@ public class Main {
     private static final int EPOCHS = 10;
     private static final int BATCH_SIZE = 32;
     private static final double LEARNING_RATE = 0.001;
+    private static final double Beta = 0.9;
 
     // File paths for MNIST dataset
     private static final String TRAIN_IMAGES_PATH = "data/train-images.idx3-ubyte";
@@ -53,6 +55,17 @@ public class Main {
             double[][] b1 = initializeBiases(1, HIDDEN1_SIZE);
             double[][] b2 = initializeBiases(1, HIDDEN2_SIZE);
             double[][] b3 = initializeBiases(1, OUTPUT_SIZE);
+
+            double[][] velocityW1=new double[W1.length][W1[0].length];
+            double[][] velocityW2=new double[W2.length][W2[0].length];
+            double[][] velocityW3=new double[W3.length][W3[0].length];
+
+            double[][] velocityB1=new double[b1.length][b1[0].length];
+            double[][] velocityB2=new double[b2.length][b2[0].length];
+            double[][] velocityB3=new double[b3.length][b3[0].length];
+
+
+
 
             // Convert training data 0,1,2,3,4,5,6,7,8,9
             double[][] X_train = normalizeData(convertToDouble(trainSet.getImages()));
@@ -105,9 +118,12 @@ public class Main {
                     // Backward pass
                     backward.computeGradients(X_batch, Y_batch, W1, W2, W3, b1, b2, b3);
 
+                    //Update velocity
+                    backward.updateVelocity(velocityW1, velocityW2, velocityW3,velocityB1, velocityB2, velocityB3,Beta);
+
 
                     // Update weights
-                    backward.updateWeights(W1, W2, W3, b1, b2, b3, LEARNING_RATE);
+                    backward.updateWeights(W1, W2, W3, b1, b2, b3, velocityW1, velocityW2, velocityW3,velocityB1, velocityB2, velocityB3, LEARNING_RATE);
                 }
 
                 // Calculate epoch metrics
@@ -153,6 +169,7 @@ public class Main {
             System.err.println("Unexpected error: " + e.getMessage());
             e.printStackTrace();
         }
+        // results without Gradient descent with momentum
         /*
         * Starting Neural Network Training...
         ============================================================
@@ -190,6 +207,43 @@ public class Main {
 
         Process finished with exit code 0
         * */
+
+        // results with Gradient descent with momentum
+        /*
+        * Loading MNIST dataset...
+            Training set: 60000 samples
+            Test set: 10000 samples
+
+             Initializing network parameters...
+            Network Architecture: 784 → 128 → 64 → 10
+
+             Starting training...
+            ============================================================
+            Epoch   1/10 | Loss: 2.4908 | Train Acc:  92.79%
+            Epoch   2/10 | Loss: 1.1853 | Train Acc:  96.57%
+            Epoch   3/10 | Loss: 0.8422 | Train Acc:  97.56%
+            Epoch   4/10 | Loss: 0.7190 | Train Acc:  97.92%
+            Epoch   5/10 | Loss: 0.5676 | Train Acc:  98.36% | Test Acc:  97.23%
+            Epoch   6/10 | Loss: 0.4922 | Train Acc:  98.58%
+            Epoch   7/10 | Loss: 0.4381 | Train Acc:  98.73%
+            Epoch   8/10 | Loss: 0.4133 | Train Acc:  98.80%
+            Epoch   9/10 | Loss: 0.3408 | Train Acc:  99.01%
+            Epoch  10/10 | Loss: 0.3431 | Train Acc:  99.01% | Test Acc:  97.54%
+            ============================================================
+            Training completed successfully!
+
+             Final Model Evaluation:
+            Final Test Accuracy: 97.54%
+
+             Sample Predictions:
+            Ok Sample 1: Predicted = 5, Actual = 5, Confidence = 91.3%
+            Ok Sample 2: Predicted = 5, Actual = 5, Confidence = 100.0%
+            Ok Sample 3: Predicted = 2, Actual = 2, Confidence = 100.0%
+            Ok Sample 4: Predicted = 7, Actual = 7, Confidence = 100.0%
+            Ok Sample 5: Predicted = 8, Actual = 8, Confidence = 99.6%
+
+            Process finished with exit code 0
+        * */
     }
 
     // Helper methods
@@ -210,7 +264,6 @@ public class Main {
     private static double[][] initializeBiases(int rows, int cols) {
         return new double[rows][cols]; // Initialize to zeros
     }
-
 
     private static double[][] convertToDouble(int[][] intArray) {
         double[][] doubleArray = new double[intArray.length][intArray[0].length];
