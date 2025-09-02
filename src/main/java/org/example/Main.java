@@ -15,6 +15,7 @@ public class Main {
     private static final int EPOCHS = 10;
     private static final int BATCH_SIZE = 32;
     private static final double LEARNING_RATE = 0.001;
+    private static final double MOMENTUM_BETA = 0.9; // Momentum coefficient (Beta)
 
     // File paths for MNIST dataset
     private static final String TRAIN_IMAGES_PATH = "data/train-images.idx3-ubyte";
@@ -45,20 +46,17 @@ public class Main {
             // Normalize and prepare data
             double[][] X_train = normalizeData(convertToDouble(trainSet.getImages()));
             double[][] Y_train = oneHotEncode(trainSet.getLabels(), OUTPUT_SIZE);
-            double[][] X_test = normalizeData(convertToDouble(testSet.getImages()));
-            double[][] Y_test = oneHotEncode(testSet.getLabels(), OUTPUT_SIZE);
+            double[][] X_test  = normalizeData(convertToDouble(testSet.getImages()));
+            double[][] Y_test  = oneHotEncode(testSet.getLabels(), OUTPUT_SIZE);
 
             // Check if saved model exists
             ModelIO.ModelParameters params;
             if (ModelIO.modelExists(MODEL_FILE)) {
-                // Load model if available
                 System.out.println("Model file found! Loading model...");
                 params = ModelIO.loadModel(MODEL_FILE);
             } else {
-                // Train new model if not found
                 System.out.println("No saved model found. Starting training...");
                 params = trainModel(forward, backward, lossFunction, X_train, Y_train, X_test, Y_test);
-                // Save model after training
                 ModelIO.saveModel(params, MODEL_FILE);
             }
 
@@ -82,11 +80,11 @@ public class Main {
     }
 
     /**
-     * Train the neural network model
+     * Train the neural network model (SGD + Momentum)
      */
     private static ModelIO.ModelParameters trainModel(Forward forward, Backward backward, Loss lossFunction,
                                                       double[][] X_train, double[][] Y_train,
-                                                      double[][] X_test, double[][] Y_test) {
+                                                      double[][] X_test,  double[][] Y_test) {
         // Initialize weights and biases
         double[][] W1 = initializeWeights(INPUT_SIZE, HIDDEN1_SIZE);
         double[][] W2 = initializeWeights(HIDDEN1_SIZE, HIDDEN2_SIZE);
@@ -95,6 +93,15 @@ public class Main {
         double[][] b1 = initializeBiases(1, HIDDEN1_SIZE);
         double[][] b2 = initializeBiases(1, HIDDEN2_SIZE);
         double[][] b3 = initializeBiases(1, OUTPUT_SIZE);
+
+        // Initialize velocities (same shapes as weights/biases)
+        double[][] vW1 = new double[INPUT_SIZE][HIDDEN1_SIZE];
+        double[][] vW2 = new double[HIDDEN1_SIZE][HIDDEN2_SIZE];
+        double[][] vW3 = new double[HIDDEN2_SIZE][OUTPUT_SIZE];
+
+        double[][] vB1 = new double[1][HIDDEN1_SIZE];
+        double[][] vB2 = new double[1][HIDDEN2_SIZE];
+        double[][] vB3 = new double[1][OUTPUT_SIZE];
 
         System.out.printf("Network Architecture: %d → %d → %d → %d\n",
                 INPUT_SIZE, HIDDEN1_SIZE, HIDDEN2_SIZE, OUTPUT_SIZE);
@@ -120,19 +127,25 @@ public class Main {
                     Y_batch[i] = Y_train[startIdx + i].clone();
                 }
 
+                // Forward
                 double[][] predictions = forward.forward(X_batch, W1, b1, W2, b2, W3, b3);
 
+                // Loss + accuracy
                 epochLoss += calculateBatchLoss(predictions, Y_batch, lossFunction);
-                correct += calculateCorrectPredictions(predictions, Y_batch);
+                correct   += calculateCorrectPredictions(predictions, Y_batch);
 
+                // Backward (compute gradients)
                 backward.computeGradients(X_batch, Y_batch, W1, W2, W3, b1, b2, b3);
-                backward.updateWeights(W1, W2, W3, b1, b2, b3, LEARNING_RATE);
+
+                // Momentum updates
+                backward.updateVelocity(vW1, vW2, vW3, vB1, vB2, vB3, MOMENTUM_BETA);
+                backward.updateWeights(W1, W2, W3, b1, b2, b3, vW1, vW2, vW3, vB1, vB2, vB3, LEARNING_RATE);
             }
 
             double avgLoss = epochLoss / totalBatches;
             double trainAccuracy = (double) correct / X_train.length * 100;
 
-            // Evaluate on test set every 5 epochs
+            // Evaluate on test set every 5 epochs (and last epoch)
             double testAccuracy = 0.0;
             if ((epoch + 1) % 5 == 0 || epoch == EPOCHS - 1) {
                 testAccuracy = evaluateModel(forward, X_test, Y_test, W1, b1, W2, b2, W3, b3);
@@ -151,7 +164,7 @@ public class Main {
         return new ModelIO.ModelParameters(W1, b1, W2, b2, W3, b3);
     }
 
-    // ==== Helper methods (same as before, just organized) ====
+    // ==== Helper methods ====
 
     private static double[][] initializeWeights(int rows, int cols) {
         double[][] weights = new double[rows][cols];
@@ -166,7 +179,7 @@ public class Main {
     }
 
     private static double[][] initializeBiases(int rows, int cols) {
-        return new double[rows][cols]; // Start with zeros
+        return new double[rows][cols]; // zeros
     }
 
     private static double[][] convertToDouble(int[][] intArray) {
@@ -183,7 +196,7 @@ public class Main {
         double[][] normalized = new double[data.length][data[0].length];
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data[0].length; j++) {
-                normalized[i][j] = data[i][j] / 255.0; // Scale to [0,1]
+                normalized[i][j] = data[i][j] / 255.0; // [0,1]
             }
         }
         return normalized;
@@ -267,7 +280,7 @@ public class Main {
         Random random = new Random();
         for (int i = 0; i < 5; i++) {
             int sampleIdx = random.nextInt(X_test.length);
-            double[][] sampleInput = {X_test[sampleIdx]};
+            double[][] sampleInput = { X_test[sampleIdx] };
 
             double[][] prediction = forward.forward(sampleInput, W1, b1, W2, b2, W3, b3);
 
