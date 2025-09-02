@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.MainController">
+    <top>
+        <VBox spacing="10.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+
+            <!-- Title -->
+            <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="Neural Network Desktop App">
+                <font>
+                    <Font name="System Bold" size="24.0" />
+                </font>
+            </Label>
+
+            <!-- Status -->
+            <Label fx:id="statusLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Ready">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+
+            <!-- Progress Bar -->
+            <ProgressBar fx:id="progressBar" maxWidth="1.7976931348623157E308" progress="0.0" visible="false" />
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="20.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+            </padding>
+
+            <!-- Image Upload Section -->
+            <VBox spacing="10.0" fx:id="inputContainer">
+                <Button fx:id="uploadImageButton" maxWidth="1.7976931348623157E308" text="Upload Image">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <ImageView fx:id="uploadedImageView" fitWidth="200" fitHeight="200" preserveRatio="true" />
+                <Button fx:id="predictButton" maxWidth="1.7976931348623157E308" text="Predict" disable="true">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Button>
+            </VBox>
+
+            <!-- Results Section -->
+            <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                <Label text="Prediction Results:">
+                    <font>
+                        <Font name="System Bold" size="16.0" />
+                    </font>
+                </Label>
+
+                <TextArea fx:id="resultArea" editable="false"
+                          promptText="Results will appear here after prediction..."
+                          VBox.vgrow="ALWAYS">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </TextArea>
+            </VBox>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" spacing="10.0">
+            <padding>
+                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+            </padding>
+
+            <Label text="Neural Network from Scratch - Java Implementation">
+                <font>
+                    <Font size="12.0" />
+                </font>
+            </Label>
+        </HBox>
+    </bottom>
+</BorderPane>
